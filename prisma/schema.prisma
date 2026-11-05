@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+
+    const project = await prisma.project.create({
+      data: {
+        title: body.title,
+        slug: body.slug,
+        category: body.category,
+        location: body.location,
+        year: body.year ? Number(body.year) : null,
+        shortDesc: body.shortDesc,
+        fullDesc: body.fullDesc,
+        coverImageUrl: body.coverImageUrl,
+        galleryImages: body.galleryImages || [],
+        status: body.status || "draft",
+      },
+    });
+
+    return NextResponse.json(project, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to create project" },
+      { status: 500 }
+    );
+  }
+}
+
